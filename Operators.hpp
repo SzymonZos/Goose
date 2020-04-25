@@ -1,5 +1,5 @@
-#ifndef OPERATORS_HPP
-#define OPERATORS_HPP
+#ifndef GENERIC_OSTREAM_OPERATORS_HPP
+#define GENERIC_OSTREAM_OPERATORS_HPP
 
 #include <array>
 #include <ostream>
@@ -83,4 +83,4 @@ std::ostream& operator<<(std::ostream& stream, const std::pair<T1, T2>& pair) {
     return stream;
 }
 
-#endif // OPERATORS_HPP
+#endif // GENERIC_OSTREAM_OPERATORS_HPP
