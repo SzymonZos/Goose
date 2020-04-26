@@ -71,6 +71,7 @@ template<template<typename...> class TT,
          typename = std::enable_if_t<!std::is_same_v<TT<T...>, std::string>>>
 std::ostream& operator<<(std::ostream& stream, const TT<T...>& collection) {
     if (collection.empty()) {
+        stream << "[]";
         return stream;
     }
     using FirstType = std::tuple_element_t<0, std::tuple<T...>>;
@@ -85,6 +86,7 @@ std::ostream& operator<<(std::ostream& stream, const TT<T...>& collection) {
 template<typename T, std::size_t N>
 std::ostream& operator<<(std::ostream& stream, const std::array<T, N>& array) {
     if (array.empty()) {
+        stream << "[]";
         return stream;
     }
     if constexpr (std::is_scalar_v<T>) {
