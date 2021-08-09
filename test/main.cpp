@@ -1,4 +1,4 @@
-#include "GenericOstreamOperators.hpp"
+#include "gos/gos.hpp"
 #include <array>
 #include <iostream>
 #include <string>

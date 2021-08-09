@@ -1,5 +1,5 @@
-#ifndef GENERIC_OSTREAM_OPERATORS_HPP
-#define GENERIC_OSTREAM_OPERATORS_HPP
+#ifndef SZO_GOS_GENERIC_OSTREAM_OPERATORS_HPP
+#define SZO_GOS_GENERIC_OSTREAM_OPERATORS_HPP
 
 #include <concepts>
 #include <ostream>
@@ -96,4 +96,4 @@ std::ostream& operator<<(std::ostream& stream, const std::pair<T1, T2>& pair) {
     return stream;
 }
 
-#endif // GENERIC_OSTREAM_OPERATORS_HPP
+#endif // SZO_GOS_GENERIC_OSTREAM_OPERATORS_HPP
