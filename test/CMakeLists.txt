@@ -1,4 +1,4 @@
-add_executable(test-gos main.cpp)
+add_executable(test-gos main.cpp tests.cpp)
 
 target_compile_options(test-gos PRIVATE
     -Wall
@@ -16,4 +16,5 @@ target_compile_options(test-gos PRIVATE
     -Wold-style-cast # Warn if c style cast is performed
 )
 
+target_include_directories(test-gos PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(test-gos PRIVATE gos)
