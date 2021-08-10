@@ -3,6 +3,7 @@
 
 #include <concepts>
 #include <ostream>
+#include <sstream>
 #include <tuple>
 #include <type_traits>
 
@@ -95,5 +96,26 @@ std::ostream& operator<<(std::ostream& stream, const std::pair<T1, T2>& pair) {
     stream << "[" << pair.first << ", " << pair.second << "]";
     return stream;
 }
+
+namespace gos {
+namespace detail {
+template<typename T>
+std::string to_string(T&& t) {
+    std::stringstream ss;
+    ss << t;
+    return ss.str();
+}
+} // namespace detail
+
+template<::detail::container T>
+std::string to_string(T&& container) {
+    return detail::to_string(std::forward<T>(container));
+}
+
+template<typename T1, typename T2>
+std::string to_string(const std::pair<T1, T2>& pair) {
+    return detail::to_string(pair);
+}
+} // namespace gos
 
 #endif // SZO_GOS_GENERIC_OSTREAM_OPERATORS_HPP
