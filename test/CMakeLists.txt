@@ -1,5 +1,22 @@
 add_executable(test-gos main.cpp tests.cpp)
 
+if(GOS_USE_LIBCPP)
+    target_compile_options(test-gos PRIVATE
+        "$<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:-stdlib=libc++>"
+    )
+    set(LIBCPP_LINK_OPTIONS "-stdlib=libc++ -fuse-ld=lld -lc++abi")
+    target_link_options(test-gos PRIVATE
+        "$<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:${LIBCPP_LINK_OPTIONS}>"
+    )
+else()
+    target_compile_options(test-gos PRIVATE
+        "$<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:-stdlib=libstdc++>"
+    )
+    target_link_options(test-gos PRIVATE
+        "$<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:-stdlib=libstdc++>"
+    )
+endif()
+
 target_compile_options(test-gos PRIVATE
     -Wall
     -Wextra
