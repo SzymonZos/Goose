@@ -1,20 +1,29 @@
-add_executable(test-gos main.cpp tests.cpp)
+set(TEST_SOURCES
+    array.cpp
+    pair.cpp
+    string.cpp
+    vector.cpp
+    unordered_map.cpp
+)
+add_executable(test-gos main.cpp ${TEST_SOURCES})
 
 if(GOS_USE_LIBCPP)
     target_compile_options(test-gos PRIVATE
-        "$<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:-stdlib=libc++>"
+        "$<$<CXX_COMPILER_ID:AppleClang,Clang>:-stdlib=libc++>"
     )
     set(LIBCPP_LINK_OPTIONS "-stdlib=libc++ -fuse-ld=lld -lc++abi")
     target_link_options(test-gos PRIVATE
-        "$<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:${LIBCPP_LINK_OPTIONS}>"
+        "$<$<CXX_COMPILER_ID:AppleClang,Clang>:${LIBCPP_LINK_OPTIONS}>"
     )
-else()
-    target_compile_options(test-gos PRIVATE
-        "$<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:-stdlib=libstdc++>"
-    )
-    target_link_options(test-gos PRIVATE
-        "$<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},Clang>:-stdlib=libstdc++>"
-    )
+endif()
+
+# As for now MSYS2 does not provide ASAN support apart from clang64 toolchain
+# https://github.com/msys2/MINGW-packages/issues/3163
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+#TODO: Investigate why it does not work on github actions
+#    target_compile_options(test-gos PRIVATE
+#        "$<$<CONFIG:Debug>:-fsanitize=undefined,address>"
+#    )
 endif()
 
 target_compile_options(test-gos PRIVATE

@@ -1,11 +1,14 @@
 #ifndef SZO_GOS_GENERIC_OSTREAM_OPERATORS_HPP
 #define SZO_GOS_GENERIC_OSTREAM_OPERATORS_HPP
 
-#include <concepts>
 #include <ostream>
 #include <sstream>
 #include <tuple>
 #include <type_traits>
+
+// Remove SFINAE implementation after migration to libc++13
+#ifdef __cpp_lib_concepts
+#include <concepts>
 
 namespace detail {
 template<typename T>
@@ -53,10 +56,11 @@ template<container T>
 void proc_scalar_collection(std::ostream& stream, T&& collection) {
     stream << "[";
     for (auto it = collection.begin(); it != collection.end(); ++it) {
+        stream << *it;
         if (std::next(it) == collection.end()) {
-            stream << *it << "]";
+            stream << "]";
         } else {
-            stream << *it << ", ";
+            stream << ", ";
         }
     }
 }
@@ -65,10 +69,9 @@ template<container T>
 void proc_complex_collection(std::ostream& stream, T&& collection) {
     stream << "{";
     for (auto it = collection.begin(); it != collection.end(); ++it) {
-        if (std::next(it) == collection.end()) {
-            stream << *it;
-        } else {
-            stream << *it << ",\n ";
+        stream << *it;
+        if (std::next(it) != collection.end()) {
+            stream << ",\n ";
         }
     }
     stream << "}";
@@ -91,6 +94,77 @@ operator<<(std::ostream& stream, T&& collection) {
     return stream;
 }
 
+#else
+namespace detail {
+template<typename T>
+using container_impl = std::void_t<decltype(std::declval<T&>().begin()),
+                                   decltype(std::declval<T&>().end()),
+                                   typename T::value_type>;
+
+template<typename T, typename = void>
+struct container : std::false_type {};
+
+template<>
+struct container<std::string> : std::false_type {};
+
+template<typename T>
+struct container<T, container_impl<T>> : std::true_type {};
+} // namespace detail
+
+template<class T1, class T2>
+std::ostream& operator<<(std::ostream& stream, const std::pair<T1, T2>& pair);
+
+template<typename T,
+         typename = std::enable_if_t<
+             detail::container<std::remove_cvref_t<T>>::value>>
+std::ostream& operator<<(std::ostream& stream, T&& collection);
+
+namespace detail {
+template<typename T,
+         typename = std::enable_if_t<container<std::remove_cvref_t<T>>::value>>
+void proc_scalar_collection(std::ostream& stream, T&& collection) {
+    stream << "[";
+    for (auto it = collection.begin(); it != collection.end(); ++it) {
+        stream << *it;
+        if (std::next(it) == collection.end()) {
+            stream << "]";
+        } else {
+            stream << ", ";
+        }
+    }
+}
+
+template<typename T,
+         typename = std::enable_if_t<container<std::remove_cvref_t<T>>::value>>
+void proc_complex_collection(std::ostream& stream, T&& collection) {
+    stream << "{";
+    for (auto it = collection.begin(); it != collection.end(); ++it) {
+        stream << *it;
+        if (std::next(it) != collection.end()) {
+            stream << ",\n ";
+        }
+    }
+    stream << "}";
+}
+} // namespace detail
+
+template<typename T, typename>
+std::ostream& operator<<(std::ostream& stream, T&& collection) {
+    if (collection.empty()) {
+        stream << "[]";
+        return stream;
+    }
+    using value_type = typename std::remove_cvref_t<T>::value_type;
+    if constexpr (std::is_scalar_v<value_type>) {
+        detail::proc_scalar_collection(stream, std::forward<T>(collection));
+    } else {
+        detail::proc_complex_collection(stream, std::forward<T>(collection));
+    }
+    return stream;
+}
+
+#endif
+
 template<class T1, class T2>
 std::ostream& operator<<(std::ostream& stream, const std::pair<T1, T2>& pair) {
     stream << "[" << pair.first << ", " << pair.second << "]";
@@ -107,10 +181,23 @@ std::string to_string(T&& t) {
 }
 } // namespace detail
 
+#ifdef __cpp_lib_concepts
 template<::detail::container T>
 std::string to_string(T&& container) {
     return detail::to_string(std::forward<T>(container));
 }
+#else
+template<typename T,
+         typename = std::enable_if_t<
+             ::detail::container<std::remove_cvref_t<T>>::value>>
+std::string to_string(T&& container) {
+    return detail::to_string(std::forward<T>(container));
+}
+
+inline std::string to_string(const std::string& str) {
+    return str;
+}
+#endif
 
 template<typename T1, typename T2>
 std::string to_string(const std::pair<T1, T2>& pair) {
