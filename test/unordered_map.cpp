@@ -1,8 +1,7 @@
 #include "gos/gos.hpp"
 
-#include <unordered_map>
 #include <string>
-#include <vector>
+#include <unordered_map>
 
 #include <catch.hpp>
 
@@ -15,21 +14,12 @@ TEST_CASE("Empty unordered map stringification", "[Empty]") {
 
 TEST_CASE("Unordered map of string and int stringification", "[Complex]") {
     using HashMap = std::unordered_map<std::string, int>;
+    using Catch::Matchers::Contains;
+
     HashMap map{{"xD", 1}, {"smth", 2}, {":(((", 3}};
-    REQUIRE(gos::to_string(map) == "{[:(((, 3],\n"
-                                   " [smth, 2],\n"
-                                   " [xD, 1]}");
+    REQUIRE_THAT(gos::to_string(map),
+                 Contains("[xD, 1]") && Contains("[smth, 2]") &&
+                     Contains("[:(((, 3]") && Contains("{[") &&
+                     Contains("]}"));
 }
-
-
-
-TEST_CASE("Vector of vectors of int stringification", "[Complex]") {
-    using Vec2 = std::vector<std::vector<int>>;
-    std::vector<int> vec{0, 10, 0, -1, 3, 2, 1};
-    Vec2 vec2{vec, vec, vec, vec};
-    REQUIRE(gos::to_string(vec2) == "{[0, 10, 0, -1, 3, 2, 1],\n"
-                                    " [0, 10, 0, -1, 3, 2, 1],\n"
-                                    " [0, 10, 0, -1, 3, 2, 1],\n"
-                                    " [0, 10, 0, -1, 3, 2, 1]}");
-}
-}
+} // namespace
