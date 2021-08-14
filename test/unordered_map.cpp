@@ -15,11 +15,13 @@ TEST_CASE("Empty unordered map stringification", "[Empty]") {
 TEST_CASE("Unordered map of string and int stringification", "[Complex]") {
     using HashMap = std::unordered_map<std::string, int>;
     using Catch::Matchers::Contains;
+    using Catch::Matchers::EndsWith;
+    using Catch::Matchers::StartsWith;
 
     HashMap map{{"xD", 1}, {"smth", 2}, {":(((", 3}};
     REQUIRE_THAT(gos::to_string(map),
-                 Contains("[xD, 1]") && Contains("[smth, 2]") &&
-                     Contains("[:(((, 3]") && Contains("{[") &&
-                     Contains("]}"));
+                 StartsWith("{[") && Contains("[xD, 1]") &&
+                     Contains("[smth, 2]") && Contains("[:(((, 3]") &&
+                     EndsWith("]}") && Contains(",\n"));
 }
 } // namespace

@@ -19,11 +19,15 @@ endif()
 
 # As for now MSYS2 does not provide ASAN support apart from clang64 toolchain
 # https://github.com/msys2/MINGW-packages/issues/3163
+# https://github.com/msys2/MINGW-packages/issues/8552
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-#TODO: Investigate why it does not work on github actions
-#    target_compile_options(test-gos PRIVATE
-#        "$<$<CONFIG:Debug>:-fsanitize=undefined,address>"
-#    )
+    set(GOS_SANITIZER_OPTIONS -fsanitize=undefined,address)
+    target_compile_options(test-gos PRIVATE
+        "$<$<CONFIG:Debug>:${GOS_SANITIZER_OPTIONS}>"
+    )
+    target_link_options(test-gos PRIVATE
+        "$<$<CONFIG:Debug>:${GOS_SANITIZER_OPTIONS}>"
+    )
 endif()
 
 target_compile_options(test-gos PRIVATE
