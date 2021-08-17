@@ -3,18 +3,26 @@
 
 #include <ostream>
 #include <sstream>
-#include <tuple>
 #include <type_traits>
 
 #ifdef __cpp_lib_concepts
 #define GOS_LIB_CONCEPTS
 #endif
 
+#ifdef GOS_LIB_CONCEPTS
+#include <concepts>
+#define GOS_CONCEPT(x) template<x T>
+#else
+#define GOS_CONCEPT(x) \
+    template<typename T, typename = std::enable_if_t<x<T>::value>>
+#endif
+#define GOS_CONTAINER GOS_CONCEPT(gos::container)
+#define GOS_PAIR GOS_CONCEPT(gos::pair)
+#define GOS_COLLECTION GOS_CONCEPT(gos::collection)
+
 namespace gos {
 
 #ifdef GOS_LIB_CONCEPTS
-#include <concepts>
-
 namespace detail {
 template<typename T>
 concept container_impl = std::regular<T> && std::swappable<T> &&
@@ -47,21 +55,56 @@ concept container = container_impl<std::remove_cvref_t<T>>;
 
 template<typename T>
 concept not_string = !std::same_as<std::remove_cvref_t<T>, std::string>;
+
+template<typename T>
+concept pair = requires(T t) {
+    { t.first } -> std::same_as<typename T::first_type>;
+    { t.second } -> std::same_as<typename T::second_type>;
+};
 } // namespace detail
 
 template<typename T>
 concept container = detail::container<T> && detail::not_string<T>;
-} // namespace gos
 
-#define GOS_CONTAINER template<gos::container T>
-#define GOS_CONTAINER_DEFINITION GOS_CONTAINER
+template<typename T>
+concept is_container_v = container<T>;
+
+template<typename T>
+concept pair = detail::pair<std::remove_cvref_t<T>>;
+
+template<typename T>
+concept is_pair_v = pair<T>;
+
+template<typename T>
+concept collection = container<T> || pair<T>;
+} // namespace gos
+#define GOS_COLLECTION_DEFINITION GOS_COLLECTION
 
 #else
 namespace detail {
 template<typename T>
-using container_impl = std::void_t<decltype(std::declval<T&>().begin()),
-                                   decltype(std::declval<T&>().end()),
-                                   typename T::value_type>;
+using container_impl = std::void_t<
+    std::is_same<decltype(std::declval<T>().begin()), typename T::iterator>,
+    std::is_same<decltype(std::declval<T>().end()), typename T::iterator>,
+    std::is_same<decltype(std::declval<T>().cbegin()),
+                 typename T::const_iterator>,
+    std::is_same<decltype(std::declval<T>().cend()),
+                 typename T::const_iterator>,
+    std::is_same<decltype(std::declval<T>().size()), typename T::size_type>,
+    std::is_same<decltype(std::declval<T>().max_size()),
+                 typename T::size_type>,
+    std::is_convertible<decltype(std::declval<T>().empty()), bool>,
+    std::is_destructible<typename T::value_type>,
+    std::is_same<typename T::reference, typename T::value_type&>,
+    std::is_same<typename T::const_reference, const typename T::value_type&>,
+    std::is_integral<typename T::difference_type>,
+    std::is_signed<typename T::difference_type>,
+    std::is_same<
+        typename T::difference_type,
+        typename std::iterator_traits<typename T::iterator>::difference_type>,
+    std::is_same<typename T::difference_type,
+                 typename std::iterator_traits<
+                     typename T::const_iterator>::difference_type>>;
 
 template<typename T, typename = void>
 struct container : std::false_type {};
@@ -72,21 +115,35 @@ struct container<std::string> : std::false_type {};
 template<typename T>
 struct container<T, container_impl<T>> : std::true_type {};
 
+template<typename T>
+using pair_impl = std::void_t<typename T::first_type, typename T::second_type>;
+
+template<typename T, typename = void>
+struct pair : std::false_type {};
+
+template<typename T>
+struct pair<T, pair_impl<T>> : std::true_type {};
 } // namespace detail
 
 template<typename T, typename = void>
 using container = detail::container<std::remove_cvref_t<T>>;
-} // namespace gos
 
-#define GOS_CONTAINER \
-    template<typename T, typename = std::enable_if_t<gos::container<T>::value>>
-#define GOS_CONTAINER_DEFINITION template<typename T, typename>
+template<typename T>
+inline constexpr bool is_container_v = container<T>::value;
+
+template<typename T, typename = void>
+using pair = detail::pair<std::remove_cvref_t<T>>;
+
+template<typename T>
+inline constexpr bool is_pair_v = pair<T>::value;
+
+template<typename T, typename = void>
+struct collection : std::disjunction<container<T>, pair<T>> {};
+} // namespace gos
+#define GOS_COLLECTION_DEFINITION template<typename T, typename>
 #endif
 
-template<class T1, class T2>
-std::ostream& operator<<(std::ostream& stream, const std::pair<T1, T2>& pair);
-
-GOS_CONTAINER
+GOS_COLLECTION
 std::ostream& operator<<(std::ostream& stream, T&& collection);
 
 namespace gos::detail {
@@ -114,27 +171,37 @@ void proc_complex_collection(std::ostream& stream, T&& collection) {
     }
     stream << "}";
 }
-} // namespace gos::detail
 
-GOS_CONTAINER_DEFINITION
-std::ostream& operator<<(std::ostream& stream, T&& collection) {
-    using namespace gos::detail;
-    if (collection.empty()) {
+GOS_CONTAINER
+std::ostream& proc_container(std::ostream& stream, T&& container) {
+    if (container.empty()) {
         stream << "[]";
         return stream;
     }
     using value_type = typename std::remove_cvref_t<T>::value_type;
     if constexpr (std::is_scalar_v<value_type>) {
-        proc_scalar_collection(stream, std::forward<T>(collection));
+        proc_scalar_collection(stream, std::forward<T>(container));
     } else {
-        proc_complex_collection(stream, std::forward<T>(collection));
+        proc_complex_collection(stream, std::forward<T>(container));
     }
     return stream;
 }
 
-template<class T1, class T2>
-std::ostream& operator<<(std::ostream& stream, const std::pair<T1, T2>& pair) {
+GOS_PAIR
+std::ostream& proc_pair(std::ostream& stream, T&& pair) {
     stream << "[" << pair.first << ", " << pair.second << "]";
+    return stream;
+}
+} // namespace gos::detail
+
+GOS_COLLECTION_DEFINITION
+std::ostream& operator<<(std::ostream& stream, T&& collection) {
+    using namespace gos::detail;
+    if constexpr (gos::is_pair_v<T>) {
+        return proc_pair(stream, std::forward<T>(collection));
+    } else if (gos::is_container_v<T>) {
+        return proc_container(stream, std::forward<T>(collection));
+    }
     return stream;
 }
 
@@ -143,23 +210,18 @@ namespace detail {
 template<typename T>
 std::string to_string(T&& t) {
     std::stringstream ss;
-    ss << t;
+    ss << std::forward<T>(t);
     return ss.str();
 }
 } // namespace detail
 
-GOS_CONTAINER
-std::string to_string(T&& container) {
-    return detail::to_string(std::forward<T>(container));
+GOS_COLLECTION
+std::string to_string(T&& collection) {
+    return detail::to_string(std::forward<T>(collection));
 }
 
 inline std::string to_string(const std::string& str) {
     return detail::to_string(str);
-}
-
-template<typename T1, typename T2>
-std::string to_string(const std::pair<T1, T2>& pair) {
-    return detail::to_string(pair);
 }
 } // namespace gos
 
