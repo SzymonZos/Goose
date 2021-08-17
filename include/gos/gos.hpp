@@ -57,9 +57,10 @@ template<typename T>
 concept not_string = !std::same_as<std::remove_cvref_t<T>, std::string>;
 
 template<typename T>
+// GCC produces lvalue reference while clang non ref value
 concept pair = requires(T t) {
-    { t.first } -> std::same_as<typename T::first_type>;
-    { t.second } -> std::same_as<typename T::second_type>;
+    { t.first } -> std::convertible_to<typename T::first_type>;
+    { t.second } -> std::convertible_to<typename T::second_type>;
 };
 } // namespace detail
 

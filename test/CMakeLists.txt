@@ -45,6 +45,9 @@ target_compile_options(test-gos PRIVATE
     -Wdouble-promotion # Warn if float is implicit promoted to double
     -Wold-style-cast # Warn if c style cast is performed
 )
+target_compile_options(test-gos PRIVATE
+    "$<$<CXX_COMPILER_ID:GNU>:-fconcepts-diagnostics-depth=5>"
+)
 
 target_include_directories(test-gos PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(test-gos PRIVATE gos)
