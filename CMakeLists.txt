@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.19)
-set(CMAKE_CXX_STANDARD 20)
+if(DEFINED GOS_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD ${GOS_CXX_STANDARD})
+else()
+    set(CMAKE_CXX_STANDARD 20)
+endif()
 
 option(GOS_BUILD_TESTS OFF)
 option(GOS_USE_LIBCPP OFF)
