@@ -33,3 +33,7 @@
 
 # Build directories
 *build*/
+
+# Project files
+.idea/*
+
