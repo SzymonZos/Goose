@@ -15,6 +15,7 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         compiler: [gcc, clang]
         build_type: [Release, Debug]
+        cpp_standard: ["17", "20"]
 
     steps:
     - uses: actions/checkout@v2
@@ -23,7 +24,13 @@ jobs:
       run: ./ci/config_compiler.sh ${{matrix.compiler}}
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_C_COMPILER=${{env.CC}} -DCMAKE_CXX_COMPILER=${{env.CXX}} -DGOS_BUILD_TESTS=ON
+      run: >
+        cmake -B ${{github.workspace}}/build
+        -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+        -DCMAKE_C_COMPILER=${{env.CC}}
+        -DCMAKE_CXX_COMPILER=${{env.CXX}}
+        -DGOS_BUILD_TESTS=ON
+        -DGOS_CXX_STANDARD=${{matrix.cpp_standard}}
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} -- -j 4
