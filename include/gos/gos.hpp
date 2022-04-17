@@ -5,6 +5,10 @@
 #include <sstream>
 #include <type_traits>
 
+#ifdef __cpp_lib_remove_cvref
+#define GOS_LIB_REMOVE_CVREF
+#endif
+
 #ifdef __cpp_lib_concepts
 #define GOS_LIB_CONCEPTS
 #endif
@@ -21,6 +25,16 @@
 #define GOS_COLLECTION GOS_CONCEPT(gos::collection)
 
 namespace gos {
+
+#ifdef GOS_LIB_REMOVE_CVREF
+template <typename T>
+using remove_cvref_t = std::remove_cvref_t<T>;
+#else
+template <typename T> struct remove_cvref : std::remove_cv<T> {};
+template <typename T> struct remove_cvref<T&> : std::remove_cv<T> {};
+template <typename T> struct remove_cvref<T&&> : std::remove_cv<T> {};
+template <typename T> using remove_cvref_t = typename remove_cvref<T>::type;
+#endif
 
 #ifdef GOS_LIB_CONCEPTS
 namespace detail {
@@ -51,10 +65,10 @@ concept container_impl = std::regular<T> && std::swappable<T> &&
 };
 
 template<typename T>
-concept container = container_impl<std::remove_cvref_t<T>>;
+concept container = container_impl<gos::remove_cvref_t<T>>;
 
 template<typename T>
-concept not_string = !std::same_as<std::remove_cvref_t<T>, std::string>;
+concept not_string = !std::same_as<gos::remove_cvref_t<T>, std::string>;
 
 template<typename T>
 // GCC produces lvalue reference while clang non ref value
@@ -71,7 +85,7 @@ template<typename T>
 concept is_container_v = container<T>;
 
 template<typename T>
-concept pair = detail::pair<std::remove_cvref_t<T>>;
+concept pair = detail::pair<gos::remove_cvref_t<T>>;
 
 template<typename T>
 concept is_pair_v = pair<T>;
@@ -127,13 +141,13 @@ struct pair<T, pair_impl<T>> : std::true_type {};
 } // namespace detail
 
 template<typename T, typename = void>
-using container = detail::container<std::remove_cvref_t<T>>;
+using container = detail::container<gos::remove_cvref_t<T>>;
 
 template<typename T>
 inline constexpr bool is_container_v = container<T>::value;
 
 template<typename T, typename = void>
-using pair = detail::pair<std::remove_cvref_t<T>>;
+using pair = detail::pair<gos::remove_cvref_t<T>>;
 
 template<typename T>
 inline constexpr bool is_pair_v = pair<T>::value;
@@ -179,7 +193,7 @@ std::ostream& proc_container(std::ostream& stream, T&& container) {
         stream << "[]";
         return stream;
     }
-    using value_type = typename std::remove_cvref_t<T>::value_type;
+    using value_type = typename gos::remove_cvref_t<T>::value_type;
     if constexpr (std::is_scalar_v<value_type>) {
         proc_scalar_collection(stream, std::forward<T>(container));
     } else {
@@ -200,7 +214,7 @@ std::ostream& operator<<(std::ostream& stream, T&& collection) {
     using namespace gos::detail;
     if constexpr (gos::is_pair_v<T>) {
         return proc_pair(stream, std::forward<T>(collection));
-    } else if (gos::is_container_v<T>) {
+    } else if constexpr (gos::is_container_v<T>) {
         return proc_container(stream, std::forward<T>(collection));
     }
     return stream;
