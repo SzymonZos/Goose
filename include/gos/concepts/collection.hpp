@@ -1,6 +1,7 @@
 #ifndef SZO_GOS_COLLECTION_HPP
 #define SZO_GOS_COLLECTION_HPP
 
+#include "gos/config/concept.hpp"
 #include "gos/config/cpp_features.hpp"
 #include "gos/config/type_traits.hpp"
 
