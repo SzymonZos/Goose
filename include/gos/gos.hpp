@@ -3,22 +3,12 @@
 
 #include "config/cpp_features.hpp"
 #include "config/concept.hpp"
+#include "config/type_traits.hpp"
 
 #include <ostream>
 #include <sstream>
-#include <type_traits>
 
 namespace gos {
-
-#ifdef GOS_LIB_REMOVE_CVREF
-template <typename T>
-using remove_cvref_t = std::remove_cvref_t<T>;
-#else
-template <typename T> struct remove_cvref : std::remove_cv<T> {};
-template <typename T> struct remove_cvref<T&> : std::remove_cv<T> {};
-template <typename T> struct remove_cvref<T&&> : std::remove_cv<T> {};
-template <typename T> using remove_cvref_t = typename remove_cvref<T>::type;
-#endif
 
 #ifdef GOS_LIB_CONCEPTS
 namespace detail {
