@@ -49,11 +49,12 @@ TEST_CASE("2D int vector stringification", "[Complex]") {
 
 TEST_CASE("3D int vector basic stringification", "[Complex]") {
     using Vec3 = std::vector<std::vector<std::vector<int>>>;
-    Vec3 vec{{{2, -2159, 69504, 664}, {543, 654}, {9098, 543}},
-             {},
-             {{11, 23}, {777}}};
-    REQUIRE(gos::to_string(vec) ==
-            "{{[2, -2159, 69504, 664],\n [543, 654],\n "
-            "[9098, 543]},\n [],\n {[11, 23],\n [777]}}");
+    Vec3 vec{{{2, -2159, 69504, 664}, {543, 654}, {9098, 543}}, {}, {{11, 23}, {777}}};
+    REQUIRE(gos::to_string(vec) == "{{[2, -2159, 69504, 664],\n"
+                                   "  [543, 654],\n"
+                                   "  [9098, 543]},\n"
+                                   " [],\n"
+                                   " {[11, 23],\n"
+                                   "  [777]}}");
 }
 } // namespace

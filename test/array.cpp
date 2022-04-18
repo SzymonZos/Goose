@@ -1,7 +1,6 @@
 #include "gos/gos.hpp"
 
 #include <array>
-#include <iostream>
 
 #include <catch.hpp>
 
@@ -39,9 +38,8 @@ TEST_CASE("Float array basic stringification", "[Scalar]") {
                              0.432454F,
                              -42.76923F,
                              0.7650234F};
-    REQUIRE(gos::to_string(arr) ==
-            "[1.40765e+06, 2.47652e+06, -4.34236e+06, 34325.4, -23.5405, "
-            "0.432454, -42.7692, 0.765023]");
+    REQUIRE(gos::to_string(arr) == "[1.40765e+06, 2.47652e+06, -4.34236e+06, 34325.4,"
+                                   " -23.5405, 0.432454, -42.7692, 0.765023]");
 }
 
 TEST_CASE("2D int array stringification", "[Complex]") {
@@ -61,10 +59,10 @@ TEST_CASE("3D int array stringification", "[Complex]") {
     };
     // clang-format on
     REQUIRE(gos::to_string(arr) == "{{[1, 2, 3, 4, 5],\n"
-                                   " [6, 7, 8, 9, 10],\n"
-                                   " [11, 12, 13, 14, 15]},\n"
+                                   "  [6, 7, 8, 9, 10],\n"
+                                   "  [11, 12, 13, 14, 15]},\n"
                                    " {[16, 17, 18, 19, 20],\n"
-                                   " [21, 22, 23, 24, 25],\n"
-                                   " [26, 27, 28, 29, 30]}}");
+                                   "  [21, 22, 23, 24, 25],\n"
+                                   "  [26, 27, 28, 29, 30]}}");
 }
 } // namespace

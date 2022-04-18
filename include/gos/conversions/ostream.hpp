@@ -13,6 +13,13 @@ GOS_COLLECTION(Collection)
 std::ostream& operator<<(std::ostream& stream, Collection&& collection);
 
 namespace gos::detail {
+GOS_COLLECTION(Collection)
+using ValueType = typename gos::remove_cvref_t<Collection>::value_type;
+
+GOS_COLLECTION(Collection)
+std::ostream&
+process_collection(std::ostream& stream, Collection&& collection, std::size_t padding = 0);
+
 GOS_CONTAINER(Container)
 void process_scalar_container(std::ostream& stream, Container&& container) {
     stream << "[";
@@ -27,28 +34,28 @@ void process_scalar_container(std::ostream& stream, Container&& container) {
 }
 
 GOS_CONTAINER(Container)
-void process_complex_container(std::ostream& stream, Container&& container) {
+void process_complex_container(std::ostream& stream, Container&& container, std::size_t padding) {
     stream << "{";
+    padding++;
     for (auto it = container.begin(); it != container.end(); ++it) {
-        stream << *it;
+        process_collection(stream, std::forward<ValueType<Container>>(*it), padding);
         if (std::next(it) != container.end()) {
-            stream << ",\n ";
+            stream << ",\n" << std::string(padding, ' ');
         }
     }
     stream << "}";
 }
 
 GOS_CONTAINER(Container)
-std::ostream& process_container(std::ostream& stream, Container&& container) {
+std::ostream& process_container(std::ostream& stream, Container&& container, std::size_t padding) {
     if (container.empty()) {
         stream << "[]";
         return stream;
     }
-    using value_type = typename gos::remove_cvref_t<Container>::value_type;
-    if constexpr (std::is_scalar_v<value_type>) {
+    if constexpr (std::is_scalar_v<ValueType<Container>>) {
         process_scalar_container(stream, std::forward<Container>(container));
     } else {
-        process_complex_container(stream, std::forward<Container>(container));
+        process_complex_container(stream, std::forward<Container>(container), padding);
     }
     return stream;
 }
@@ -58,17 +65,22 @@ std::ostream& process_pair(std::ostream& stream, Pair&& pair) {
     stream << "[" << pair.first << ", " << pair.second << "]";
     return stream;
 }
+
+GOS_COLLECTION(Collection)
+std::ostream&
+process_collection(std::ostream& stream, Collection&& collection, std::size_t padding) {
+    if constexpr (gos::is_pair_v<Collection>) {
+        return process_pair(stream, std::forward<Collection>(collection));
+    } else if constexpr (gos::is_container_v<Collection>) {
+        return process_container(stream, std::forward<Collection>(collection), padding);
+    }
+    return stream;
+}
 } // namespace gos::detail
 
 GOS_COLLECTION_DEFINITION(Collection)
 std::ostream& operator<<(std::ostream& stream, Collection&& collection) {
-    using namespace gos::detail;
-    if constexpr (gos::is_pair_v<Collection>) {
-        return process_pair(stream, std::forward<Collection>(collection));
-    } else if constexpr (gos::is_container_v<Collection>) {
-        return process_container(stream, std::forward<Collection>(collection));
-    }
-    return stream;
+    return gos::detail::process_collection(stream, std::forward<Collection>(collection));
 }
 
 #endif // SZO_GOS_OSTREAM_HPP
