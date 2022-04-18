@@ -16,7 +16,7 @@ std::ostream& operator<<(std::ostream& stream, T&& collection);
 namespace gos::detail {
 
 GOS_CONTAINER(T)
-void proc_scalar_collection(std::ostream& stream, T&& collection) {
+void process_scalar_collection(std::ostream& stream, T&& collection) {
     stream << "[";
     for (auto it = collection.begin(); it != collection.end(); ++it) {
         stream << *it;
@@ -29,7 +29,7 @@ void proc_scalar_collection(std::ostream& stream, T&& collection) {
 }
 
 GOS_CONTAINER(T)
-void proc_complex_collection(std::ostream& stream, T&& collection) {
+void process_complex_collection(std::ostream& stream, T&& collection) {
     stream << "{";
     for (auto it = collection.begin(); it != collection.end(); ++it) {
         stream << *it;
@@ -41,22 +41,22 @@ void proc_complex_collection(std::ostream& stream, T&& collection) {
 }
 
 GOS_CONTAINER(T)
-std::ostream& proc_container(std::ostream& stream, T&& container) {
+std::ostream& process_container(std::ostream& stream, T&& container) {
     if (container.empty()) {
         stream << "[]";
         return stream;
     }
     using value_type = typename gos::remove_cvref_t<T>::value_type;
     if constexpr (std::is_scalar_v<value_type>) {
-        proc_scalar_collection(stream, std::forward<T>(container));
+        process_scalar_collection(stream, std::forward<T>(container));
     } else {
-        proc_complex_collection(stream, std::forward<T>(container));
+        process_complex_collection(stream, std::forward<T>(container));
     }
     return stream;
 }
 
 GOS_PAIR(T)
-std::ostream& proc_pair(std::ostream& stream, T&& pair) {
+std::ostream& process_pair(std::ostream& stream, T&& pair) {
     stream << "[" << pair.first << ", " << pair.second << "]";
     return stream;
 }
@@ -66,9 +66,9 @@ GOS_COLLECTION_DEFINITION(T)
 std::ostream& operator<<(std::ostream& stream, T&& collection) {
     using namespace gos::detail;
     if constexpr (gos::is_pair_v<T>) {
-        return proc_pair(stream, std::forward<T>(collection));
+        return process_pair(stream, std::forward<T>(collection));
     } else if constexpr (gos::is_container_v<T>) {
-        return proc_container(stream, std::forward<T>(collection));
+        return process_container(stream, std::forward<T>(collection));
     }
     return stream;
 }
