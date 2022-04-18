@@ -14,11 +14,11 @@ std::ostream& operator<<(std::ostream& stream, T&& collection);
 
 namespace gos::detail {
 GOS_CONTAINER(T)
-void process_scalar_collection(std::ostream& stream, T&& collection) {
+void process_scalar_container(std::ostream& stream, T&& container) {
     stream << "[";
-    for (auto it = collection.begin(); it != collection.end(); ++it) {
+    for (auto it = container.begin(); it != container.end(); ++it) {
         stream << *it;
-        if (std::next(it) == collection.end()) {
+        if (std::next(it) == container.end()) {
             stream << "]";
         } else {
             stream << ", ";
@@ -27,11 +27,11 @@ void process_scalar_collection(std::ostream& stream, T&& collection) {
 }
 
 GOS_CONTAINER(T)
-void process_complex_collection(std::ostream& stream, T&& collection) {
+void process_complex_container(std::ostream& stream, T&& container) {
     stream << "{";
-    for (auto it = collection.begin(); it != collection.end(); ++it) {
+    for (auto it = container.begin(); it != container.end(); ++it) {
         stream << *it;
-        if (std::next(it) != collection.end()) {
+        if (std::next(it) != container.end()) {
             stream << ",\n ";
         }
     }
@@ -46,9 +46,9 @@ std::ostream& process_container(std::ostream& stream, T&& container) {
     }
     using value_type = typename gos::remove_cvref_t<T>::value_type;
     if constexpr (std::is_scalar_v<value_type>) {
-        process_scalar_collection(stream, std::forward<T>(container));
+        process_scalar_container(stream, std::forward<T>(container));
     } else {
-        process_complex_collection(stream, std::forward<T>(container));
+        process_complex_container(stream, std::forward<T>(container));
     }
     return stream;
 }
