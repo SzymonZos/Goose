@@ -1,17 +1,11 @@
 #ifndef SZO_GOS_GENERIC_OSTREAM_OPERATORS_HPP
 #define SZO_GOS_GENERIC_OSTREAM_OPERATORS_HPP
 
+#include "config/cpp_features.hpp"
+
 #include <ostream>
 #include <sstream>
 #include <type_traits>
-
-#ifdef __cpp_lib_remove_cvref
-#define GOS_LIB_REMOVE_CVREF
-#endif
-
-#ifdef __cpp_lib_concepts
-#define GOS_LIB_CONCEPTS
-#endif
 
 #ifdef GOS_LIB_CONCEPTS
 #include <concepts>
