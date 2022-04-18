@@ -66,7 +66,7 @@ std::ostream& process_pair(std::ostream& stream, Pair&& pair) {
     return stream;
 }
 
-GOS_COLLECTION(Collection)
+GOS_COLLECTION_DEFINITION(Collection)
 std::ostream&
 process_collection(std::ostream& stream, Collection&& collection, std::size_t padding) {
     if constexpr (gos::is_pair_v<Collection>) {
