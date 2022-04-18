@@ -2,21 +2,11 @@
 #define SZO_GOS_GENERIC_OSTREAM_OPERATORS_HPP
 
 #include "config/cpp_features.hpp"
+#include "config/concept.hpp"
 
 #include <ostream>
 #include <sstream>
 #include <type_traits>
-
-#ifdef GOS_LIB_CONCEPTS
-#include <concepts>
-#define GOS_CONCEPT(x) template<x T>
-#else
-#define GOS_CONCEPT(x) \
-    template<typename T, typename = std::enable_if_t<x<T>::value>>
-#endif
-#define GOS_CONTAINER GOS_CONCEPT(gos::container)
-#define GOS_PAIR GOS_CONCEPT(gos::pair)
-#define GOS_COLLECTION GOS_CONCEPT(gos::collection)
 
 namespace gos {
 
@@ -87,7 +77,6 @@ concept is_pair_v = pair<T>;
 template<typename T>
 concept collection = container<T> || pair<T>;
 } // namespace gos
-#define GOS_COLLECTION_DEFINITION GOS_COLLECTION
 
 #else
 namespace detail {
@@ -149,7 +138,6 @@ inline constexpr bool is_pair_v = pair<T>::value;
 template<typename T, typename = void>
 struct collection : std::disjunction<container<T>, pair<T>> {};
 } // namespace gos
-#define GOS_COLLECTION_DEFINITION template<typename T, typename>
 #endif
 
 GOS_COLLECTION
