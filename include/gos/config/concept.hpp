@@ -7,8 +7,7 @@
 #include <concepts>
 #define GOS_CONCEPT(CONCEPT, T) template<CONCEPT T>
 #else
-#define GOS_CONCEPT(CONCEPT, T) \
-    template<typename T, typename = std::enable_if_t<CONCEPT<T>::value>>
+#define GOS_CONCEPT(CONCEPT, T) template<typename T, typename = std::enable_if_t<CONCEPT<T>::value>>
 #endif
 
 #define GOS_CONTAINER(T) GOS_CONCEPT(gos::container, T)

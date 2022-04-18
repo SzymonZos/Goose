@@ -13,19 +13,16 @@ namespace gos {
 namespace detail {
 template<typename T>
 concept container_impl =
-    std::regular<T> && std::swappable<T> &&
-    std::destructible<typename T::value_type> &&
+    std::regular<T> && std::swappable<T> && std::destructible<typename T::value_type> &&
     std::same_as<typename T::reference, typename T::value_type&> &&
     std::same_as<typename T::const_reference, const typename T::value_type&> &&
     std::forward_iterator<typename T::iterator> &&
     std::forward_iterator<typename T::const_iterator> &&
     std::signed_integral<typename T::difference_type> &&
     std::same_as<typename T::difference_type,
-                 typename std::iterator_traits<
-                     typename T::iterator>::difference_type> &&
+                 typename std::iterator_traits<typename T::iterator>::difference_type> &&
     std::same_as<typename T::difference_type,
-                 typename std::iterator_traits<
-                     typename T::const_iterator>::difference_type> &&
+                 typename std::iterator_traits<typename T::const_iterator>::difference_type> &&
     requires(T a, const T b) {
         { a.begin() } -> std::same_as<typename T::iterator>;
         { a.end() } -> std::same_as<typename T::iterator>;
@@ -36,7 +33,7 @@ concept container_impl =
         { a.size() } -> std::same_as<typename T::size_type>;
         { a.max_size() } -> std::same_as<typename T::size_type>;
         { a.empty() } -> std::convertible_to<bool>;
-};
+    };
 
 template<typename T>
 concept container = container_impl<gos::remove_cvref_t<T>>;
@@ -57,25 +54,20 @@ template<typename T>
 using container_impl = std::void_t<
     std::is_same<decltype(std::declval<T>().begin()), typename T::iterator>,
     std::is_same<decltype(std::declval<T>().end()), typename T::iterator>,
-    std::is_same<decltype(std::declval<T>().cbegin()),
-                 typename T::const_iterator>,
-    std::is_same<decltype(std::declval<T>().cend()),
-                 typename T::const_iterator>,
+    std::is_same<decltype(std::declval<T>().cbegin()), typename T::const_iterator>,
+    std::is_same<decltype(std::declval<T>().cend()), typename T::const_iterator>,
     std::is_same<decltype(std::declval<T>().size()), typename T::size_type>,
-    std::is_same<decltype(std::declval<T>().max_size()),
-                 typename T::size_type>,
+    std::is_same<decltype(std::declval<T>().max_size()), typename T::size_type>,
     std::is_convertible<decltype(std::declval<T>().empty()), bool>,
     std::is_destructible<typename T::value_type>,
     std::is_same<typename T::reference, typename T::value_type&>,
     std::is_same<typename T::const_reference, const typename T::value_type&>,
     std::is_integral<typename T::difference_type>,
     std::is_signed<typename T::difference_type>,
-    std::is_same<
-        typename T::difference_type,
-        typename std::iterator_traits<typename T::iterator>::difference_type>,
     std::is_same<typename T::difference_type,
-                 typename std::iterator_traits<
-                     typename T::const_iterator>::difference_type>>;
+                 typename std::iterator_traits<typename T::iterator>::difference_type>,
+    std::is_same<typename T::difference_type,
+                 typename std::iterator_traits<typename T::const_iterator>::difference_type>>;
 
 template<typename T, typename = void>
 struct container : std::false_type {};
