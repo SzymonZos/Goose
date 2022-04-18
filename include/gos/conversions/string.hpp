@@ -18,9 +18,9 @@ std::string to_string(T&& t) {
 }
 } // namespace detail
 
-GOS_COLLECTION(T)
-std::string to_string(T&& collection) {
-    return detail::to_string(std::forward<T>(collection));
+GOS_COLLECTION(Collection)
+std::string to_string(Collection&& collection) {
+    return detail::to_string(std::forward<Collection>(collection));
 }
 
 inline std::string to_string(const std::string& str) {
