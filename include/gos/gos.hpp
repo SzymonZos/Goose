@@ -140,11 +140,11 @@ struct collection : std::disjunction<container<T>, pair<T>> {};
 } // namespace gos
 #endif
 
-GOS_COLLECTION
+GOS_COLLECTION(T)
 std::ostream& operator<<(std::ostream& stream, T&& collection);
 
 namespace gos::detail {
-GOS_CONTAINER
+GOS_CONTAINER(T)
 void proc_scalar_collection(std::ostream& stream, T&& collection) {
     stream << "[";
     for (auto it = collection.begin(); it != collection.end(); ++it) {
@@ -157,7 +157,7 @@ void proc_scalar_collection(std::ostream& stream, T&& collection) {
     }
 }
 
-GOS_CONTAINER
+GOS_CONTAINER(T)
 void proc_complex_collection(std::ostream& stream, T&& collection) {
     stream << "{";
     for (auto it = collection.begin(); it != collection.end(); ++it) {
@@ -169,7 +169,7 @@ void proc_complex_collection(std::ostream& stream, T&& collection) {
     stream << "}";
 }
 
-GOS_CONTAINER
+GOS_CONTAINER(T)
 std::ostream& proc_container(std::ostream& stream, T&& container) {
     if (container.empty()) {
         stream << "[]";
@@ -184,14 +184,14 @@ std::ostream& proc_container(std::ostream& stream, T&& container) {
     return stream;
 }
 
-GOS_PAIR
+GOS_PAIR(T)
 std::ostream& proc_pair(std::ostream& stream, T&& pair) {
     stream << "[" << pair.first << ", " << pair.second << "]";
     return stream;
 }
 } // namespace gos::detail
 
-GOS_COLLECTION_DEFINITION
+GOS_COLLECTION_DEFINITION(T)
 std::ostream& operator<<(std::ostream& stream, T&& collection) {
     using namespace gos::detail;
     if constexpr (gos::is_pair_v<T>) {
@@ -212,7 +212,7 @@ std::string to_string(T&& t) {
 }
 } // namespace detail
 
-GOS_COLLECTION
+GOS_COLLECTION(T)
 std::string to_string(T&& collection) {
     return detail::to_string(std::forward<T>(collection));
 }

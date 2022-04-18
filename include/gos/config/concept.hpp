@@ -5,20 +5,20 @@
 
 #ifdef GOS_LIB_CONCEPTS
 #include <concepts>
-#define GOS_CONCEPT(x) template<x T>
+#define GOS_CONCEPT(CONCEPT, T) template<CONCEPT T>
 #else
-#define GOS_CONCEPT(x) \
-    template<typename T, typename = std::enable_if_t<x<T>::value>>
+#define GOS_CONCEPT(CONCEPT, T) \
+    template<typename T, typename = std::enable_if_t<CONCEPT<T>::value>>
 #endif
 
-#define GOS_CONTAINER GOS_CONCEPT(gos::container)
-#define GOS_PAIR GOS_CONCEPT(gos::pair)
-#define GOS_COLLECTION GOS_CONCEPT(gos::collection)
+#define GOS_CONTAINER(T) GOS_CONCEPT(gos::container, T)
+#define GOS_PAIR(T) GOS_CONCEPT(gos::pair, T)
+#define GOS_COLLECTION(T) GOS_CONCEPT(gos::collection, T)
 
 #ifdef GOS_LIB_CONCEPTS
-#define GOS_COLLECTION_DEFINITION GOS_COLLECTION
+#define GOS_COLLECTION_DEFINITION(T) GOS_COLLECTION(T)
 #else
-#define GOS_COLLECTION_DEFINITION template<typename T, typename>
+#define GOS_COLLECTION_DEFINITION(T) template<typename T, typename>
 #endif
 
 #endif // SZO_GOS_CONCEPT_HPP
