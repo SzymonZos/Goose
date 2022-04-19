@@ -25,12 +25,11 @@ void process_scalar_container(std::ostream& stream, Container&& container) {
     stream << "[";
     for (auto it = container.begin(); it != container.end(); ++it) {
         stream << *it;
-        if (std::next(it) == container.end()) {
-            stream << "]";
-        } else {
+        if (std::next(it) != container.end()) {
             stream << ", ";
         }
     }
+    stream << "]";
 }
 
 GOS_CONTAINER(Container)
@@ -48,11 +47,8 @@ void process_complex_container(std::ostream& stream, Container&& container, std:
 
 GOS_CONTAINER(Container)
 std::ostream& process_container(std::ostream& stream, Container&& container, std::size_t padding) {
-    if (container.empty()) {
-        stream << "[]";
-        return stream;
-    }
-    if constexpr (std::is_scalar_v<ValueType<Container>>) {
+    using ContainerValueType = ValueType<Container>;
+    if constexpr (std::is_scalar_v<ContainerValueType> || gos::is_pair_v<ContainerValueType>) {
         process_scalar_container(stream, std::forward<Container>(container));
     } else {
         process_complex_container(stream, std::forward<Container>(container), padding);

@@ -20,7 +20,7 @@ TEST_CASE("Unordered map of string and int stringification", "[Complex]") {
 
     HashMap map{{"xD", 1}, {"smth", 2}, {":(((", 3}};
     REQUIRE_THAT(gos::to_string(map),
-                 StartsWith("{[") && Contains("[xD, 1]") && Contains("[smth, 2]") &&
-                     Contains("[:(((, 3]") && EndsWith("]}") && Contains(",\n"));
+                 StartsWith("[[") && Contains("[xD, 1]") && Contains("[smth, 2]") &&
+                     Contains("[:(((, 3]") && EndsWith("]]") && Contains(", "));
 }
 } // namespace

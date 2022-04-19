@@ -12,12 +12,12 @@ TEST_CASE("Empty vector stringification", "[Empty]") {
 
 TEST_CASE("Empty 2D vector stringification", "[Empty]") {
     std::vector<std::vector<int>> vec{};
-    REQUIRE(gos::to_string(vec) == "[]");
+    REQUIRE(gos::to_string(vec) == "{}");
 }
 
 TEST_CASE("Empty 4D vector stringification", "[Empty]") {
     std::vector<std::vector<std::vector<std::vector<int>>>> vec{};
-    REQUIRE(gos::to_string(vec) == "[]");
+    REQUIRE(gos::to_string(vec) == "{}");
 }
 
 TEST_CASE("Int vector stringification", "[Scalar]") {
@@ -53,7 +53,7 @@ TEST_CASE("3D int vector basic stringification", "[Complex]") {
     REQUIRE(gos::to_string(vec) == "{{[2, -2159, 69504, 664],\n"
                                    "  [543, 654],\n"
                                    "  [9098, 543]},\n"
-                                   " [],\n"
+                                   " {},\n"
                                    " {[11, 23],\n"
                                    "  [777]}}");
 }

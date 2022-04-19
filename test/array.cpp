@@ -15,12 +15,12 @@ TEST_CASE("Empty array stringification", "[Empty]") {
 
 TEST_CASE("Empty 2D array stringification", "[Empty]") {
     EmptyArr<EmptyArr<float>> arr{};
-    REQUIRE(gos::to_string(arr) == "[]");
+    REQUIRE(gos::to_string(arr) == "{}");
 }
 
 TEST_CASE("Empty 4D array stringification", "[Empty]") {
     EmptyArr<EmptyArr<EmptyArr<EmptyArr<unsigned>>>> arr{};
-    REQUIRE(gos::to_string(arr) == "[]");
+    REQUIRE(gos::to_string(arr) == "{}");
 }
 
 TEST_CASE("Int array basic stringification", "[Scalar]") {
