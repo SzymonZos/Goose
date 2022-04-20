@@ -1,0 +1,31 @@
+name: Release gos
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initial Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Quom to generate single header
+        run: pip install --user quom
+
+      - name: Amalgamate gos into single header
+        run: ~/.local/bin/quom ./include/gos/gos.hpp gos.hpp -I ./include -g SZO_GOS_.+_HPP
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            gos.hpp
+            LICENSE
+            README.md
