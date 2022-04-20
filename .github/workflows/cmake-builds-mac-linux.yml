@@ -1,4 +1,4 @@
-name: CMake
+name: CMake builds for Mac and Linux
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
 
 jobs:
   build:
+    name: ${{matrix.os}}, ${{matrix.compiler}}, ${{matrix.build_type}}, C++${{matrix.cpp_standard}}
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
