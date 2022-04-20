@@ -9,14 +9,14 @@ on:
 
 jobs:
   build:
-    name: ${{matrix.os}}, ${{matrix.compiler}}, ${{matrix.build_type}}, C++${{matrix.cpp_standard}}
+    name: ${{matrix.os}}, ${{matrix.compiler}}, ${{matrix.build_type}}, C++${{matrix.cpp_std}}
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        compiler: [gcc, clang]
-        build_type: [Release, Debug]
-        cpp_standard: ["17", "20"]
+        os: [ ubuntu-latest, macos-latest ]
+        compiler: [ gcc, clang ]
+        build_type: [ Release, Debug ]
+        cpp_std: [ "17", "20" ]
 
     steps:
     - uses: actions/checkout@v2
