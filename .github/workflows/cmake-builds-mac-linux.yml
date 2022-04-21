@@ -5,6 +5,11 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_call:
+    inputs:
+      release:
+        required: true
+        type: boolean
   workflow_dispatch:
 
 jobs:
@@ -19,7 +24,19 @@ jobs:
         cpp_std: [ "17", "20" ]
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Initial checkout
+        uses: actions/checkout@v3
+
+      - name: Download single header Goose
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: release.yml
+          name: goose-all
+        if: inputs.release
+
+      - name: Replace Goose with amalgamated single header
+        run: mv -f goose.hpp ./include/gos/goose.hpp
+        if: inputs.release
 
       - name: Configure compiler
         run: ./ci/config_compiler.sh ${{matrix.compiler}}
