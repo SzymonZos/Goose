@@ -1,19 +1,19 @@
-set(TEST_SOURCES
+set(GOS_TEST_SOURCES
     array.cpp
     pair.cpp
     string.cpp
     vector.cpp
     unordered_map.cpp
 )
-add_executable(test-gos main.cpp ${TEST_SOURCES})
+add_executable(test-goose main.cpp ${GOS_TEST_SOURCES})
 
 if(GOS_USE_LIBCPP)
-    target_compile_options(test-gos PRIVATE
+    target_compile_options(test-goose PRIVATE
         "$<$<CXX_COMPILER_ID:AppleClang,Clang>:-stdlib=libc++>"
     )
-    set(LIBCPP_LINK_OPTIONS "-stdlib=libc++ -fuse-ld=lld -lc++abi")
-    target_link_options(test-gos PRIVATE
-        "$<$<CXX_COMPILER_ID:AppleClang,Clang>:${LIBCPP_LINK_OPTIONS}>"
+    set(GOS_LIBCPP_LINK_OPTIONS "-stdlib=libc++ -fuse-ld=lld -lc++abi")
+    target_link_options(test-goose PRIVATE
+        "$<$<CXX_COMPILER_ID:AppleClang,Clang>:${GOS_LIBCPP_LINK_OPTIONS}>"
     )
 endif()
 
@@ -22,15 +22,15 @@ endif()
 # https://github.com/msys2/MINGW-packages/issues/8552
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(GOS_SANITIZER_OPTIONS -fsanitize=undefined,address)
-    target_compile_options(test-gos PRIVATE
+    target_compile_options(test-goose PRIVATE
         "$<$<CONFIG:Debug>:${GOS_SANITIZER_OPTIONS}>"
     )
-    target_link_options(test-gos PRIVATE
+    target_link_options(test-goose PRIVATE
         "$<$<CONFIG:Debug>:${GOS_SANITIZER_OPTIONS}>"
     )
 endif()
 
-target_compile_options(test-gos PRIVATE
+target_compile_options(test-goose PRIVATE
     -Wall
     -Wextra
     -Werror
@@ -45,9 +45,9 @@ target_compile_options(test-gos PRIVATE
     -Wdouble-promotion # Warn if float is implicit promoted to double
     -Wold-style-cast # Warn if c style cast is performed
 )
-target_compile_options(test-gos PRIVATE
+target_compile_options(test-goose PRIVATE
     "$<$<CXX_COMPILER_ID:GNU>:-fconcepts-diagnostics-depth=5>"
 )
 
-target_include_directories(test-gos PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(test-gos PRIVATE gos)
+target_include_directories(test-goose PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(test-goose PRIVATE goose)

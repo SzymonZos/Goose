@@ -7,10 +7,10 @@ endif()
 
 option(GOS_BUILD_TESTS OFF)
 option(GOS_USE_LIBCPP OFF)
-project(gos VERSION "0.1")
+project(goose VERSION "0.1.0")
 
-add_library(gos INTERFACE)
-target_include_directories(gos INTERFACE
+add_library(goose INTERFACE)
+target_include_directories(goose INTERFACE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
 

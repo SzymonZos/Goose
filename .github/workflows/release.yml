@@ -1,4 +1,4 @@
-name: Release gos
+name: Release Goose
 
 permissions:
   contents: write
@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  amalgamate_gos:
-    name: Amalgamate gos into single header
+  amalgamate:
+    name: Amalgamate Goose into single header
     runs-on: ubuntu-latest
     steps:
       - name: Initial checkout
@@ -20,18 +20,19 @@ jobs:
       - name: Install Quom to generate single header
         run: pip install --user quom
 
-      - name: Amalgamate gos into single header
-        run: ~/.local/bin/quom ./include/gos/gos.hpp gos.hpp -I ./include -g SZO_GOS_.+_HPP
+      - name: Amalgamate Goose into single header
+        run: ~/.local/bin/quom ./include/gos/goose.hpp goose.hpp -I ./include -g SZO_GOS_.+_HPP
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload single header Goose as artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: gos-all
-          path: gos.hpp
+          name: goose-all
+          path: goose.hpp
 
   build:
     name: ${{matrix.os}}, ${{matrix.compiler}}, C++${{matrix.cpp_std}}
     runs-on: ${{matrix.os}}
-    needs: amalgamate_gos
+    needs: amalgamate
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest ]
@@ -41,13 +42,13 @@ jobs:
       - name: Initial checkout
         uses: actions/checkout@v3
 
-      - name: Download single header gos
+      - name: Download single header Goose
         uses: actions/download-artifact@v3
         with:
-          name: gos-all
+          name: goose-all
 
-      - name: Replace gos with amalgamated single header
-        run: mv -f gos.hpp ./include/gos/gos.hpp
+      - name: Replace Goose with amalgamated single header
+        run: mv -f goose.hpp ./include/gos/goose.hpp
 
       - name: Configure compiler
         run: ./ci/config_compiler.sh ${{matrix.compiler}}
@@ -66,7 +67,7 @@ jobs:
 
       - name: Test
         working-directory: ${{github.workspace}}/build
-        run: ./test/test-gos
+        run: ./test/test-goose
 
   release:
     name: Release
@@ -76,15 +77,15 @@ jobs:
       - name: Initial checkout
         uses: actions/checkout@v3
 
-      - name: Download single header gos
+      - name: Download single header Goose
         uses: actions/download-artifact@v3
         with:
-          name: gos-all
+          name: goose-all
 
-      - name: Release
+      - name: Release Goose
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            gos.hpp
+            goose.hpp
             LICENSE
             README.md

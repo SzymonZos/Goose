@@ -1,4 +1,4 @@
-#include "gos/gos.hpp"
+#include "gos/goose.hpp"
 
 #include <string>
 
@@ -14,4 +14,4 @@ TEST_CASE("Is basic string still working", "[Scalar]") {
     std::string str{"something"};
     REQUIRE(gos::to_string(str) == "something");
 }
-}
+} // namespace

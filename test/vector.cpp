@@ -1,4 +1,4 @@
-#include "gos/gos.hpp"
+#include "gos/goose.hpp"
 
 #include <vector>
 
