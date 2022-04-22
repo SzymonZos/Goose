@@ -27,10 +27,35 @@ jobs:
       - name: Initial checkout
         uses: actions/checkout@v3
 
+      # Workaround for issue with dawidd6/action-download-artifact@v2:
+      # https://github.com/dawidd6/action-download-artifact/issues/147#issuecomment-1096127848
+      # https://github.com/dawidd6/action-download-artifact/issues/147#issuecomment-1096296334
+      - name: Get Run ID
+        id: get_run_id
+        run: |
+          echo "::set-output name=run_id::$(\
+            gh run list \
+              --workflow release.yml \
+              --json databaseId,headSha \
+              --jq ". | map(select(.headSha == \"${{github.sha}}\")) | first(.[]).databaseId" \
+          )"
+          echo "[asdf] begin Run ID:"
+          echo "${{steps.get_run_id.outputs.run_id}}"
+          echo "[asdf] end"
+          sleep 5
+          curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/SzymonZos/Goose/actions/artifacts
+          sleep 5
+
+        env:
+          GITHUB_TOKEN: ${{github.token}}
+        if: inputs.release
+
       - name: Download single header Goose
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: release.yml
+          run_id: ${{steps.get_run_id.outputs.run_id}}
+          commit: ${{github.sha}}
           name: goose-all
         if: inputs.release
 
