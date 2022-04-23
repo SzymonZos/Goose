@@ -5,11 +5,9 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-  workflow_call:
-    inputs:
-      release:
-        required: true
-        type: boolean
+  workflow_run:
+    workflows: [ Amalgamate Goose ]
+    types: [ completed ]
   workflow_dispatch:
 
 jobs:
@@ -27,41 +25,27 @@ jobs:
       - name: Initial checkout
         uses: actions/checkout@v3
 
-      # Workaround for issue with dawidd6/action-download-artifact@v2:
-      # https://github.com/dawidd6/action-download-artifact/issues/147#issuecomment-1096127848
-      # https://github.com/dawidd6/action-download-artifact/issues/147#issuecomment-1096296334
-      - name: Get Run ID
-        id: get_run_id
-        run: |
-          echo "::set-output name=run_id::$(\
-            gh run list \
-              --workflow release.yml \
-              --json databaseId,headSha \
-              --jq ". | map(select(.headSha == \"${{github.sha}}\")) | first(.[]).databaseId" \
-          )"
-          echo "[asdf] begin Run ID:"
-          echo "${{steps.get_run_id.outputs.run_id}}"
-          echo "[asdf] end"
-          sleep 5
-          curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/SzymonZos/Goose/actions/artifacts
-          sleep 5
-
+      - name: "[Release] Check status of Amalgamate Goose"
         env:
-          GITHUB_TOKEN: ${{github.token}}
-        if: inputs.release
+          IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          PREV_WORKFLOW_FAILED: ${{ github.event.workflow_run.conclusion == 'failure' }}
+          SHOULD_FAIL: ${{ env.IS_RELEASE == 'true' && env.PREV_WORKFLOW_FAILED == 'true' }}
+        if: ${{ env.SHOULD_FAIL == 'true' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed('Amalgamate Goose workflow failed during release')
 
-      - name: Download single header Goose
+      - name: "[Release] Download single header Goose"
         uses: dawidd6/action-download-artifact@v2
         with:
-          workflow: release.yml
-          run_id: ${{steps.get_run_id.outputs.run_id}}
-          commit: ${{github.sha}}
+          workflow: amalgamate.yml
           name: goose-all
-        if: inputs.release
+        if: ${{ env.IS_RELEASE == 'true' }}
 
-      - name: Replace Goose with amalgamated single header
+      - name: "[Release] Replace Goose with amalgamated single header"
         run: mv -f goose.hpp ./include/gos/goose.hpp
-        if: inputs.release
+        if: ${{ env.IS_RELEASE == 'true' }}
 
       - name: Configure compiler
         run: ./ci/config_compiler.sh ${{matrix.compiler}}

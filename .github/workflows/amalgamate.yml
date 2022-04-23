@@ -1,0 +1,30 @@
+name: Amalgamate Goose
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  amalgamate:
+    name: Amalgamate Goose into single header
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initial checkout
+        uses: actions/checkout@v3
+
+      - name: Install Quom to generate single header
+        run: pip install --user quom
+
+      - name: Amalgamate Goose into single header
+        run: ~/.local/bin/quom ./include/gos/goose.hpp goose.hpp -I ./include -g SZO_GOS_.+_HPP
+
+      - name: Upload single header Goose as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: goose-all
+          path: goose.hpp
