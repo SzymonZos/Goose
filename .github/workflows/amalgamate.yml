@@ -4,10 +4,7 @@ permissions:
   contents: write
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
-  workflow_dispatch:
+  workflow_call:
 
 jobs:
   amalgamate:
