@@ -1,0 +1,28 @@
+name: Publish artifacts
+
+permissions:
+  contents: write
+
+on:
+  workflow_call:
+
+jobs:
+  publish:
+    name: Publish Goose
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initial checkout
+        uses: actions/checkout@v3
+
+      - name: Download single header Goose
+        uses: actions/download-artifact@v3
+        with:
+          name: goose-all
+
+      - name: Release Goose
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            goose.hpp
+            LICENSE
+            README.md

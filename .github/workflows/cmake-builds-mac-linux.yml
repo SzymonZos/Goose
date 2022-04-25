@@ -5,9 +5,11 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-  workflow_run:
-    workflows: [ Amalgamate Goose ]
-    types: [ completed ]
+  workflow_call:
+    inputs:
+      release:
+        required: true
+        type: boolean
   workflow_dispatch:
 
 jobs:
@@ -27,22 +29,14 @@ jobs:
       - name: Initial checkout
         uses: actions/checkout@v3
 
-      - name: "[Release] Check status of Amalgamate Goose"
-        if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-            core.setFailed('Amalgamate Goose workflow failed during release')
-
       - name: "[Release] Download single header Goose"
-        uses: dawidd6/action-download-artifact@v2
-        if: ${{ env.AMALGAMATING_PASSED == 'true' }}
+        if: inputs.release
+        uses: actions/download-artifact@v3
         with:
-          workflow: amalgamate.yml
           name: goose-all
 
       - name: "[Release] Replace Goose with amalgamated single header"
-        if: ${{ env.AMALGAMATING_PASSED == 'true' }}
+        if: inputs.release
         run: mv -f goose.hpp ./include/gos/goose.hpp
 
       - name: Configure compiler
@@ -63,7 +57,3 @@ jobs:
       - name: Test
         working-directory: ${{github.workspace}}/build
         run: ./test/test-goose
-
-      - name: "[Release] Call release workflow"
-        if: ${{ env.AMALGAMATING_PASSED == 'true' }}
-        uses: ./.github/workflows/release.yml

@@ -1,36 +1,21 @@
-name: Release Goose
-
-permissions:
-  contents: write
+name: 'Release Goose'
 
 on:
-  workflow_call:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
 
 jobs:
-  debug_info:
-    name: Debug Info
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print Github context
-        run: echo '${{ toJSON(github) }}'
+  call-amalgamate:
+    uses: ./.github/workflows/amalgamate.yml
 
-  release:
-    name: Release Goose
-    runs-on: ubuntu-latest
-    steps:
-      - name: Initial checkout
-        uses: actions/checkout@v3
+  call-cmake-builds-mac-linux:
+    needs: call-amalgamate
+    uses: ./.github/workflows/cmake-builds-mac-linux.yml
+    with:
+      release: true
 
-      - name: Download single header Goose
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          workflow: amalgamate.yml
-          name: goose-all
-
-      - name: Release Goose
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            goose.hpp
-            LICENSE
-            README.md
+  call-upload-artifact:
+    needs: call-cmake-builds-mac-linux
+    uses: ./.github/workflows/publish.yml
