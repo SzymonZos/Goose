@@ -63,3 +63,7 @@ jobs:
       - name: Test
         working-directory: ${{github.workspace}}/build
         run: ./test/test-goose
+
+      - name: "[Release] Call release workflow"
+        if: ${{ env.AMALGAMATING_PASSED == 'true' }}
+        uses: ./.github/workflows/release.yml
